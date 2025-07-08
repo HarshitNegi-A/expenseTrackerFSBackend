@@ -3,9 +3,11 @@ const cors = require("cors");
 const app=express()
 const signUpRoute=require('./router/signUpRoutes')
 const logInRoute=require('./router/logInRoutes')
+const expenseRoute=require('./router/expenseRouter')
 app.use(cors());    
 app.use(express.json());    
 app.use('/signup',signUpRoute)
 app.use('/login',logInRoute)
+app.use('/expenses',expenseRoute)
 
 app.listen(3000,()=>console.log("Server started"))
