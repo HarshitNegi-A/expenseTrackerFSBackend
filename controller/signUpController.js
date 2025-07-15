@@ -1,30 +1,29 @@
-const db = require('../db');
 const bcrypt = require('bcrypt');
+const Users  = require('../models/usersModel'); // Adjust this path if needed
 const saltRounds = 10;
 
-exports.signup = (req, res) => {
+exports.signup = async (req, res) => {
   const { name, email, password } = req.body;
+  const normalizedEmail = email.toLowerCase();
 
-  db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-    if (err) return res.status(500).json({ message: 'DB error' });
+  try {
+    const existingUser = await Users.findOne({ where: { email: normalizedEmail } });
 
-    if (results.length > 0) {
+    if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    // 🔐 Hash the password
-    bcrypt.hash(password, saltRounds, (err, hash) => {
-      if (err) return res.status(500).json({ message: 'Hashing error' });
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // ✅ Use hashed password in the INSERT
-      db.query(
-        'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-        [name, email, hash],
-        (err, result) => {
-          if (err) return res.status(500).json({ message: 'Insert error' });
-          res.status(201).json({ message: 'User registered successfully' });
-        }
-      );
+    await Users.create({
+      name:name,
+      email:normalizedEmail,
+      password:hashedPassword
     });
-  });
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };

@@ -1,15 +1,35 @@
-const mysql=require('mysql2')
+const {Sequelize}=require('sequelize')
 
-const connection=mysql.createConnection({
+const sequelize=new Sequelize('expenseTrackerFullStack','root','Harshit@123',{
     host:'localhost',
-    user:'root',
-    password:'Harshit@123',
-    database:'expenseTrackerFullStack'
-})
+    dialect:'mysql'
+});
 
-connection.connect((err)=>{
-    if(err) throw err;
-    console.log("Connected to MySQL DB")
-})
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection is created');
+  } catch (err) {
+    console.log('Unable to connect to the database:', err);
+  }
+})();
 
-module.exports=connection;
+
+module.exports=sequelize;
+
+
+// const mysql=require('mysql2')
+
+// const connection=mysql.createConnection({
+//     host:'localhost',
+//     user:'root',
+//     password:'Harshit@123',
+//     database:'expenseTrackerFullStack'
+// })
+
+// connection.connect((err)=>{
+//     if(err) throw err;
+//     console.log("Connected to MySQL DB")
+// })
+
+// module.exports=connection;
