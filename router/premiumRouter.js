@@ -6,4 +6,6 @@ const authenticate = require('../middleware/auth');
 router.post('/create-order', authenticate, premiumController.createOrder);
 router.get('/verify',authenticate,premiumController.verify)
 router.get('/status',authenticate,premiumController.getPremiumStatus)
+router.get('/leaderboard', authenticate, premiumController.getLeaderboard);
+
 module.exports = router;

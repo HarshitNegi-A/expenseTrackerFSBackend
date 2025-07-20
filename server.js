@@ -35,7 +35,7 @@ User.hasMany(Order, { foreignKey: 'userId' });
 Order.belongsTo(User, { foreignKey: 'userId' });
 
 // ✅ Sync DB and start server
-sequelize.sync({force:true})
+sequelize.sync()
   .then(() => {
     console.log('All tables synced successfully');
     app.listen(3000, () => console.log("Server is running on port 3000..."));

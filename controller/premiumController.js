@@ -1,6 +1,7 @@
 const { Cashfree, CFEnvironment } = require("cashfree-pg");
 const Order = require("../models/orders");
 const User = require("../models/usersModel");
+const Expense=require('../models/expenseModel')
 const cashfree = new Cashfree(
   CFEnvironment.SANDBOX,
   "TEST430329ae80e0f32e41a393d78b923034",
@@ -73,9 +74,54 @@ exports.verify = async (req, res) => {
 
 exports.getPremiumStatus = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    return res.json({ isPremium: user.isPremium });
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'name', 'email', 'isPremium']
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ user });
   } catch (err) {
+    console.error("Error in getPremiumStatus:", err);
     res.status(500).json({ error: "Failed to fetch premium status" });
+  }
+};
+
+
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user.isPremium) {
+      return res.status(403).json({ message: 'Access denied: Premium members only.' });
+    }
+
+    const leaderboard = await User.findAll({
+      attributes: ['id', 'name', 'email'],
+      include: [{
+        model: Expense,
+        attributes: ['amount']
+      }]
+    });
+
+    const leaderboardData = leaderboard.map(user => {
+      const totalExpenses = user.Expenses.reduce((sum, expense) => sum + expense.amount, 0);
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        totalExpenses
+      };
+    });
+
+    // Sort by totalExpenses descending
+    leaderboardData.sort((a, b) => b.totalExpenses - a.totalExpenses);
+
+    res.status(200).json(leaderboardData);
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };

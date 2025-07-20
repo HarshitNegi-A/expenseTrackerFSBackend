@@ -18,7 +18,8 @@ exports.signup = async (req, res) => {
     await Users.create({
       name:name,
       email:normalizedEmail,
-      password:hashedPassword
+      password:hashedPassword,
+      isPremium: false 
     });
 
     res.status(201).json({ message: 'User registered successfully' });
